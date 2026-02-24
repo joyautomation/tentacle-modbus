@@ -10,7 +10,7 @@ Listens on 127.0.0.1:5502.
 Prints "READY" to stdout once the server is up so CI can wait for it.
 
 Usage:
-  pip install "pymodbus>=3.5,<3.8"
+  pip install "pymodbus>=3.5,<3.6"
   python scripts/pymodbus_server.py
 """
 
