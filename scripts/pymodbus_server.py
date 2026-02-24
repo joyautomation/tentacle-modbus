@@ -41,6 +41,7 @@ async def main() -> None:
         co=ModbusSequentialDataBlock(0, [False] * COUNT),
         hr=ModbusSequentialDataBlock(0, list(range(COUNT))),
         ir=ModbusSequentialDataBlock(0, list(range(COUNT))),
+        zero_mode=True,
     )
     context = ModbusServerContext(slaves=store, single=True)
 
