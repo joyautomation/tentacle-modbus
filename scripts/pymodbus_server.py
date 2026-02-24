@@ -24,8 +24,10 @@ try:
         ModbusSlaveContext,
         ModbusServerContext,
     )
-except ImportError:
-    print("ERROR: pymodbus not installed. Run: pip install pymodbus", file=sys.stderr)
+except ImportError as e:
+    print(f"ERROR: pymodbus import failed: {e}", file=sys.stderr)
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 
 HOST = "127.0.0.1"
