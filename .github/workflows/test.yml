@@ -60,7 +60,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install pymodbus
-        run: pip install pymodbus
+        run: pip install "pymodbus>=3.5,<3.8"
 
       - name: Start pymodbus server (background)
         working-directory: tentacle-modbus
