@@ -1,0 +1,82 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # ─── Layer 1 + 2: Unit + fixture integration tests ──────────────────────────
+  unit-and-integration:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: tentacle-modbus
+
+      - name: Checkout nats-schema (sibling dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: joyautomation/tentacle-nats-schema
+          path: tentacle-nats-schema
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type check
+        working-directory: tentacle-modbus
+        run: deno check main.ts
+
+      - name: Unit tests (spec bytes, no network)
+        working-directory: tentacle-modbus
+        run: deno task test:unit
+
+      - name: Integration tests (fixture server)
+        working-directory: tentacle-modbus
+        run: deno task test:integration
+
+  # ─── Layer 3: Third-party server smoke test ──────────────────────────────────
+  pymodbus-smoke:
+    name: Pymodbus Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: tentacle-modbus
+
+      - name: Checkout nats-schema (sibling dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: joyautomation/tentacle-nats-schema
+          path: tentacle-nats-schema
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install pymodbus
+        run: pip install pymodbus
+
+      - name: Start pymodbus server (background)
+        working-directory: tentacle-modbus
+        run: python scripts/pymodbus_server.py &
+
+      - name: Wait for pymodbus to be ready
+        run: |
+          for i in $(seq 1 20); do
+            nc -z 127.0.0.1 5502 && echo "Server ready" && exit 0
+            sleep 0.5
+          done
+          echo "Server did not start" && exit 1
+
+      - name: Pymodbus smoke tests
+        working-directory: tentacle-modbus
+        run: deno task test:smoke
+        env:
+          PYMODBUS_HOST: "127.0.0.1"
+          PYMODBUS_PORT: "5502"
