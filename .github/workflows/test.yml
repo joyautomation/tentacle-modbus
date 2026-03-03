@@ -11,29 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: tentacle-modbus
-
-      - name: Checkout nats-schema (sibling dependency)
-        uses: actions/checkout@v4
-        with:
-          repository: joyautomation/tentacle-nats-schema
-          path: tentacle-nats-schema
 
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
       - name: Type check
-        working-directory: tentacle-modbus
         run: deno check main.ts
 
       - name: Unit tests (spec bytes, no network)
-        working-directory: tentacle-modbus
         run: deno task test:unit
 
       - name: Integration tests (fixture server)
-        working-directory: tentacle-modbus
         run: deno task test:integration
 
   # ─── Layer 3: Third-party server smoke test ──────────────────────────────────
@@ -42,14 +31,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: tentacle-modbus
-
-      - name: Checkout nats-schema (sibling dependency)
-        uses: actions/checkout@v4
-        with:
-          repository: joyautomation/tentacle-nats-schema
-          path: tentacle-nats-schema
 
       - uses: denoland/setup-deno@v2
         with:
@@ -63,7 +44,6 @@ jobs:
         run: pip install "pymodbus>=3.5,<3.6"
 
       - name: Start pymodbus server (background)
-        working-directory: tentacle-modbus
         run: python scripts/pymodbus_server.py &
 
       - name: Wait for pymodbus to be ready
@@ -75,7 +55,6 @@ jobs:
           echo "Server did not start" && exit 1
 
       - name: Pymodbus smoke tests
-        working-directory: tentacle-modbus
         run: deno task test:smoke
         env:
           PYMODBUS_HOST: "127.0.0.1"
