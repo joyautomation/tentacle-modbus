@@ -97,6 +97,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@joyautomation/coral@^0.0.12",
+      "jsr:@joyautomation/tentacle-nats-schema@^0.0.4",
       "jsr:@nats-io/jetstream@3",
       "jsr:@nats-io/kv@3",
       "jsr:@nats-io/transport-deno@3",
