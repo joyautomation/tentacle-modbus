@@ -4,6 +4,10 @@ import { log } from "../utils/logger.ts";
 
 const encoder = new TextEncoder();
 
+/** Sanitize a device ID for use in NATS subjects (spaces and special chars are invalid). */
+const sanitizeDeviceId = (id: string): string =>
+  id.replace(/[ .*>]/g, "_");
+
 export type BatchValue = {
   tagId: string;
   value: number | boolean;
@@ -32,7 +36,7 @@ export function publishBatch(
       timestamp,
     };
     try {
-      nc.publish(`modbus.data.${deviceId}`, encoder.encode(JSON.stringify(msg)));
+      nc.publish(`modbus.data.${sanitizeDeviceId(deviceId)}`, encoder.encode(JSON.stringify(msg)));
     } catch (err) {
       log.nats.warn(`Failed to publish tag ${tagId}: ${err}`);
     }
